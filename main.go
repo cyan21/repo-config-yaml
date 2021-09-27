@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/jfrog/cyan21/repo-config-yaml/commands"
+	"github.com/cyan21/repo-config-yaml/commands"
 	"github.com/jfrog/jfrog-cli-core/v2/plugins"
 	"github.com/jfrog/jfrog-cli-core/v2/plugins/components"
 )
@@ -21,7 +21,6 @@ func getApp() components.App {
 
 func getCommands() []components.Command {
 	return []components.Command{
-		commands.GetHelloCommand(),
 		commands.GetExportCommand(),
 	}
 }
