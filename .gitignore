@@ -6,9 +6,11 @@
 # Test files
 tmp
 out
+test
+gen-*.yml
 
 # Template executable
-jfrog-cli-plugin-template
+repo-mgmt
 
 # Vim
 *~
