@@ -17,6 +17,23 @@ Uninstalling a plugin
 
 `$ jfrog plugin uninstall repo-config`
 
+## Testing
+
+**2 environment variables** are required for running the unit tests :
+* TEST_RT_URL : Artifactory URL (https://<FQDN>/artifactory) **DO NOT ADD / AT THE END**
+* TEST_RT_TOKEN : Must be an Artifactory Admin Access Token
+````
+$ cd commands/utils
+// all tests
+$ go test -v 
+
+// specific test
+$ go test -v -run CreateDockerRepo
+
+````
+
+
+
 ## Usage
 ### Commands
 

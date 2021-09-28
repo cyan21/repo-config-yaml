@@ -21,6 +21,64 @@ type LocalYamlRepositories struct {
 	Repos map[string]LocalRepoYAML `yaml:"localRepositories"`
 }
 
+var layout = map[string]string{
+	"composer": "composer-default",
+	"conan":    "conan-default",
+	"debian":   "simple-default",
+	"docker":   "simple-default",
+	"generic":  "simple-default",
+	"gems":     "simple-default",
+	"go":       "go-default",
+	"gradle":   "maven-2-default",
+	"helm":     "simple-default",
+	"maven":    "maven-2-default",
+	"ivy":      "ivy-default",
+	"npm":      "simple-default",
+	"nuget":    "nuget-default",
+	"pypi":     "simple-default",
+	"yum":      "simple-default",
+	"sbt":      "sbt-default",
+}
+
+func TestCreateDockerRepo(t *testing.T) {
+
+	if !RtInfoAvailable() {
+		t.Log("environment variables TEST_RT_URL and TEST_RT_URL have to be set")
+		t.FailNow()
+	}
+
+	var testLocalRepos LocalYamlRepositories
+	testLocalRepos.Repos = make(map[string]LocalRepoYAML)
+	myBoolValue := true
+	pkgType := "docker"
+	repoKey := "test-" + pkgType + "-release-local"
+	autoDelete := true
+
+	// prepare dummy repo
+	dockerLocalRepo := services.DockerLocalRepositoryParams{}
+	dockerLocalRepo.RepositoryBaseParams.Rclass = "LOCAL"
+	dockerLocalRepo.RepositoryBaseParams.Key = repoKey
+	dockerLocalRepo.RepositoryBaseParams.PackageType = pkgType
+	dockerLocalRepo.RepositoryBaseParams.RepoLayoutRef = layout[pkgType]
+	// any pointer has to be valued otherwise the test fails
+	dockerLocalRepo.ArchiveBrowsingEnabled = &myBoolValue
+	dockerLocalRepo.BlackedOut = &myBoolValue
+	dockerLocalRepo.DownloadRedirect = &myBoolValue
+	dockerLocalRepo.PriorityResolution = &myBoolValue
+	dockerLocalRepo.PropertySets = nil
+	dockerLocalRepo.XrayIndex = &myBoolValue
+	// specific
+	dockerLocalRepo.BlockPushingSchema1 = &myBoolValue
+
+	testLocalRepos.Repos[repoKey] = SetYAMLForDockerLocal(&dockerLocalRepo)
+	data, _ := yaml.Marshal(testLocalRepos)
+	t.Log(string(data))
+
+	result := RunPatchConfig(os.Getenv("TEST_RT_URL"), os.Getenv("TEST_RT_TOKEN"), repoKey, data, autoDelete, t)
+
+	assert.Contains(t, string(result), "successfully")
+}
+
 func TestCreateGenericRepo(t *testing.T) {
 
 	if !RtInfoAvailable() {
@@ -56,6 +114,88 @@ func TestCreateGenericRepo(t *testing.T) {
 
 	assert.Contains(t, string(result), "successfully")
 }
+
+func TestCreateMavenRepo(t *testing.T) {
+
+	if !RtInfoAvailable() {
+		t.Log("environment variables TEST_RT_URL and TEST_RT_URL have to be set")
+		t.FailNow()
+	}
+
+	var testLocalRepos LocalYamlRepositories
+	testLocalRepos.Repos = make(map[string]LocalRepoYAML)
+	myBoolValue := true
+	pkgType := "maven"
+	repoKey := "test-" + pkgType + "-release-local"
+	autoDelete := true
+
+	// prepare dummy repo
+	mvnLocalRepo := services.MavenLocalRepositoryParams{}
+	mvnLocalRepo.RepositoryBaseParams.Rclass = "LOCAL"
+	mvnLocalRepo.RepositoryBaseParams.Key = repoKey
+	mvnLocalRepo.RepositoryBaseParams.PackageType = pkgType
+	mvnLocalRepo.RepositoryBaseParams.RepoLayoutRef = layout[pkgType]
+	// any pointer has to be valued otherwise the test fails
+	mvnLocalRepo.ArchiveBrowsingEnabled = &myBoolValue
+	mvnLocalRepo.BlackedOut = &myBoolValue
+	mvnLocalRepo.DownloadRedirect = &myBoolValue
+	mvnLocalRepo.PriorityResolution = &myBoolValue
+	mvnLocalRepo.PropertySets = nil
+	mvnLocalRepo.XrayIndex = &myBoolValue
+	// specific
+	mvnLocalRepo.HandleReleases = &myBoolValue
+	mvnLocalRepo.HandleSnapshots = &myBoolValue
+	mvnLocalRepo.SuppressPomConsistencyChecks = &myBoolValue
+
+	testLocalRepos.Repos[repoKey] = SetYAMLForJavaLocal(&mvnLocalRepo)
+	data, _ := yaml.Marshal(testLocalRepos)
+	t.Log(string(data))
+
+	result := RunPatchConfig(os.Getenv("TEST_RT_URL"), os.Getenv("TEST_RT_TOKEN"), repoKey, data, autoDelete, t)
+
+	assert.Contains(t, string(result), "successfully")
+}
+
+func TestCreateNugetRepo(t *testing.T) {
+
+	if !RtInfoAvailable() {
+		t.Log("environment variables TEST_RT_URL and TEST_RT_URL have to be set")
+		t.FailNow()
+	}
+
+	var testLocalRepos LocalYamlRepositories
+	testLocalRepos.Repos = make(map[string]LocalRepoYAML)
+	myBoolValue := true
+	pkgType := "nuget"
+	repoKey := "test-" + pkgType + "-release-local"
+	autoDelete := true
+
+	// prepare dummy repo
+	nugetLocalRepo := services.NugetLocalRepositoryParams{}
+	nugetLocalRepo.RepositoryBaseParams.Rclass = "LOCAL"
+	nugetLocalRepo.RepositoryBaseParams.Key = repoKey
+	nugetLocalRepo.RepositoryBaseParams.PackageType = pkgType
+	nugetLocalRepo.RepositoryBaseParams.RepoLayoutRef = layout[pkgType]
+	// any pointer has to be valued otherwise the test fails
+	nugetLocalRepo.ArchiveBrowsingEnabled = &myBoolValue
+	nugetLocalRepo.BlackedOut = &myBoolValue
+	nugetLocalRepo.DownloadRedirect = &myBoolValue
+	nugetLocalRepo.PriorityResolution = &myBoolValue
+	nugetLocalRepo.PropertySets = nil
+	nugetLocalRepo.XrayIndex = &myBoolValue
+	// specific
+	nugetLocalRepo.ForceNugetAuthentication = &myBoolValue
+
+	testLocalRepos.Repos[repoKey] = SetYAMLForNugetLocal(&nugetLocalRepo)
+	data, _ := yaml.Marshal(testLocalRepos)
+	t.Log(string(data))
+
+	result := RunPatchConfig(os.Getenv("TEST_RT_URL"), os.Getenv("TEST_RT_TOKEN"), repoKey, data, autoDelete, t)
+
+	assert.Contains(t, string(result), "successfully")
+}
+
+////////////////// HELPER FUNCTIONS
 
 func RtInfoAvailable() bool {
 
