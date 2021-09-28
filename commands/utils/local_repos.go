@@ -63,7 +63,7 @@ func SetYAMLForLocal(repo *services.LocalRepositoryBaseParams) LocalRepoYAML {
 	}
 }
 
-func SetYAMLforCargoForLocal(repo *services.CargoLocalRepositoryParams) LocalRepoYAML {
+func SetYAMLForCargoLocal(repo *services.CargoLocalRepositoryParams) LocalRepoYAML {
 	return LocalRepoYAML{
 		ArchiveBrowsingEnabled: *repo.ArchiveBrowsingEnabled,
 		BlackedOut:             *repo.BlackedOut,
@@ -82,7 +82,7 @@ func SetYAMLforCargoForLocal(repo *services.CargoLocalRepositoryParams) LocalRep
 	}
 }
 
-func SetYAMLforDebianForLocal(repo *services.DebianLocalRepositoryParams) LocalRepoYAML {
+func SetYAMLForDebianLocal(repo *services.DebianLocalRepositoryParams) LocalRepoYAML {
 	return LocalRepoYAML{
 		ArchiveBrowsingEnabled: *repo.ArchiveBrowsingEnabled,
 		BlackedOut:             *repo.BlackedOut,
@@ -103,7 +103,7 @@ func SetYAMLforDebianForLocal(repo *services.DebianLocalRepositoryParams) LocalR
 	}
 }
 
-func SetYAMLforDockerForLocal(repo *services.DockerLocalRepositoryParams) LocalRepoYAML {
+func SetYAMLForDockerLocal(repo *services.DockerLocalRepositoryParams) LocalRepoYAML {
 	return LocalRepoYAML{
 		ArchiveBrowsingEnabled: *repo.ArchiveBrowsingEnabled,
 		BlackedOut:             *repo.BlackedOut,
@@ -125,7 +125,7 @@ func SetYAMLforDockerForLocal(repo *services.DockerLocalRepositoryParams) LocalR
 	}
 }
 
-func SetYAMLforJavaForLocal(repo *services.MavenLocalRepositoryParams) LocalRepoYAML {
+func SetYAMLForJavaLocal(repo *services.MavenLocalRepositoryParams) LocalRepoYAML {
 	return LocalRepoYAML{
 		ArchiveBrowsingEnabled: *repo.ArchiveBrowsingEnabled,
 		BlackedOut:             *repo.BlackedOut,
@@ -149,7 +149,7 @@ func SetYAMLforJavaForLocal(repo *services.MavenLocalRepositoryParams) LocalRepo
 	}
 }
 
-func SetYAMLforNugetForLocal(repo *services.NugetLocalRepositoryParams) LocalRepoYAML {
+func SetYAMLForNugetLocal(repo *services.NugetLocalRepositoryParams) LocalRepoYAML {
 	return LocalRepoYAML{
 		ArchiveBrowsingEnabled: *repo.ArchiveBrowsingEnabled,
 		BlackedOut:             *repo.BlackedOut,
@@ -169,7 +169,7 @@ func SetYAMLforNugetForLocal(repo *services.NugetLocalRepositoryParams) LocalRep
 	}
 }
 
-func SetYAMLforRpmForLocal(repo *services.RpmLocalRepositoryParams) LocalRepoYAML {
+func SetYAMLForRpmLocal(repo *services.RpmLocalRepositoryParams) LocalRepoYAML {
 	return LocalRepoYAML{
 		ArchiveBrowsingEnabled: *repo.ArchiveBrowsingEnabled,
 		BlackedOut:             *repo.BlackedOut,
