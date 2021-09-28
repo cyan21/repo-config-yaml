@@ -74,7 +74,6 @@ func SetYAMLForJavaVirtual(repo *services.MavenVirtualRepositoryParams) VirtualR
 		Repositories:               (*repo).Repositories,
 		Notes:                      (*repo).Notes,
 		Type:                       (*repo).PackageType,
-
 		// Java specificities
 		// HandleReleases                       *repo
 		// HandleSnapshots                      *repo
