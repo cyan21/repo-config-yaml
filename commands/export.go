@@ -122,32 +122,32 @@ func (r LocalYamlRepositories) add(pkgType string, repoName string, servicesMana
 		theRepo := services.MavenLocalRepositoryParams{}
 		(*servicesManager).GetRepository(repoName, &theRepo)
 		// fmt.Printf("%+v\n", theRepo)
-		r.Repos[repoName] = repoutils.SetYAMLforJavaForLocal(&theRepo)
+		r.Repos[repoName] = repoutils.SetYAMLForJavaLocal(&theRepo)
 
 	case "Cargo":
 		theRepo := services.CargoLocalRepositoryParams{}
 		(*servicesManager).GetRepository(repoName, &theRepo)
-		r.Repos[repoName] = repoutils.SetYAMLforCargoForLocal(&theRepo)
+		r.Repos[repoName] = repoutils.SetYAMLForCargoLocal(&theRepo)
 
 	case "Debian":
 		theRepo := services.DebianLocalRepositoryParams{}
 		(*servicesManager).GetRepository(repoName, &theRepo)
-		r.Repos[repoName] = repoutils.SetYAMLforDebianForLocal(&theRepo)
+		r.Repos[repoName] = repoutils.SetYAMLForDebianLocal(&theRepo)
 
 	case "Docker":
 		theRepo := services.DockerLocalRepositoryParams{}
 		(*servicesManager).GetRepository(repoName, &theRepo)
-		r.Repos[repoName] = repoutils.SetYAMLforDockerForLocal(&theRepo)
+		r.Repos[repoName] = repoutils.SetYAMLForDockerLocal(&theRepo)
 
 	case "Nuget":
 		theRepo := services.NugetLocalRepositoryParams{}
 		(*servicesManager).GetRepository(repoName, &theRepo)
-		r.Repos[repoName] = repoutils.SetYAMLforNugetForLocal(&theRepo)
+		r.Repos[repoName] = repoutils.SetYAMLForNugetLocal(&theRepo)
 
 	case "Rpm", "Yum":
 		theRepo := services.RpmLocalRepositoryParams{}
 		(*servicesManager).GetRepository(repoName, &theRepo)
-		r.Repos[repoName] = repoutils.SetYAMLforRpmForLocal(&theRepo)
+		r.Repos[repoName] = repoutils.SetYAMLForRpmLocal(&theRepo)
 
 	default:
 		theRepo := services.LocalRepositoryBaseParams{}
@@ -318,10 +318,6 @@ func ExportCmd(c *components.Context) error {
 		_ = ioutil.WriteFile("gen-virtual-repos.yml", data, 0644)
 
 	}
-
-	// data, _ = yaml.Marshal(remoteRepos)
-	// fmt.Println(string(data))
-	// _ = ioutil.WriteFile("gen-remote-repos.yml", data, 0644)
 
 	return nil
 }
