@@ -1,66 +1,89 @@
 package utils
 
 import (
+	"bytes"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"testing"
+	"time"
 
+	"github.com/jfrog/jfrog-client-go/artifactory"
+	"github.com/jfrog/jfrog-client-go/artifactory/auth"
+	"github.com/jfrog/jfrog-client-go/artifactory/services"
+	"github.com/jfrog/jfrog-client-go/config"
+	"github.com/jfrog/jfrog-client-go/utils/log"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v2"
 )
 
-func TestCreateJavaRepo(t *testing.T) {
-	InitRTConnection(t)
-	assert.Equal(t, "Hello World!", "Hello World!")
+type LocalYamlRepositories struct {
+	Repos map[string]LocalRepoYAML `yaml:"localRepositories"`
 }
 
-func InitRTConnection(t *testing.T) string {
+func TestCreateGenericRepo(t *testing.T) {
 
-	// var file *os.File
-	// log.SetLogger(log.NewLogger(log.INFO, file))
+	if !RtInfoAvailable() {
+		t.Log("environment variables TEST_RT_URL and TEST_RT_URL have to be set")
+		t.FailNow()
+	}
 
-	// rtDetails := auth.NewArtifactoryDetails()
-	// // rtDetails.SetUrl(os.Getenv("TEST_RT_URL"))
-	// // rtDetails.SetAccessToken(os.Getenv("TEST_RT_TOKEN"))
-	// rtDetails.SetUrl("https://yann-swampup.dev.aws.devopsacc.team/artifactory")
-	// rtDetails.SetAccessToken("eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJYZDNac0dZSkx2enE1ZElaY3pMb0hfR0poQ3NCU1Q0ZVZvZExWc1JUMkJRIn0.eyJleHQiOiJ7XCJyZXZvY2FibGVcIjpcInRydWVcIn0iLCJzdWIiOiJqZmFjQDAxZmFrZ21jbXliOTVmMGd5dGN4d24xcHBhXC91c2Vyc1wvYWRtaW4iLCJzY3AiOiJhcHBsaWVkLXBlcm1pc3Npb25zXC91c2VyIiwiYXVkIjoiKkAqIiwiaXNzIjoiamZmZUAwMDAiLCJleHAiOjE2NjQwOTM3NjMsImlhdCI6MTYzMjU1Nzc2MywianRpIjoiYTUwMDg5ODgtZTZlOS00NWE0LWE4MTgtZWVhMDFlYTQ2MzdkIn0.QqIQwp_LGk4oI3xTxvf5NVhjJ_A1TGKCuHcQGFG5p2Acj-aep2HOCOYaZjOKeTxYFgGTEMtaYOahaUFg6HHLOhkAr7LSpWB5eT2YsSmiBSqs5GTX35L4VmCW28eAcTR5OmUfbbkBFdtnk68ud1EkVSJySz44uOdr1eQk0um9i075XhT8wjHFSNwI-AEJ4xnYNPzUR8yJA-LJmiv33GRKowajyZX8IsLGlHrOgzaM7OIbrSGbS6FF6p9eE6YEuIpwDneK4BpFCNSP1DQmg3O3MY2bG7DoRUX7W-J36k_0UArhiDd_upe0gDyyz0tF3A-u1Vt4aEEVvFrDcB0AlsxQ-w")
+	var testLocalRepos LocalYamlRepositories
+	testLocalRepos.Repos = make(map[string]LocalRepoYAML)
+	myBoolValue := true
+	repoKey := "test-generic-release-local"
+	autoDelete := true
 
-	// serviceConfig, err := config.NewConfigBuilder().
-	// 	SetServiceDetails(rtDetails).
-	// 	SetDryRun(false).
-	// 	// Add [Context](https://golang.org/pkg/context/)
-	// 	// SetContext(ctx).
-	// 	Build()
+	// prepare dummy repo
+	gnrLocalRepo := services.LocalRepositoryBaseParams{}
+	gnrLocalRepo.RepositoryBaseParams.Rclass = "LOCAL"
+	gnrLocalRepo.RepositoryBaseParams.Key = repoKey
+	gnrLocalRepo.RepositoryBaseParams.PackageType = "generic"
+	gnrLocalRepo.RepositoryBaseParams.RepoLayoutRef = "simple-default"
+	// any pointer has to be valued otherwise the test fails
+	gnrLocalRepo.ArchiveBrowsingEnabled = &myBoolValue
+	gnrLocalRepo.BlackedOut = &myBoolValue
+	gnrLocalRepo.DownloadRedirect = &myBoolValue
+	gnrLocalRepo.PriorityResolution = &myBoolValue
+	gnrLocalRepo.PropertySets = nil
+	gnrLocalRepo.XrayIndex = &myBoolValue
 
-	// if err != nil {
-	// 	return err.Error()
-	// }
+	testLocalRepos.Repos[repoKey] = SetYAMLForLocal(&gnrLocalRepo)
+	data, _ := yaml.Marshal(testLocalRepos)
+	t.Log(string(data))
 
-	// servicesManager, err2 := artifactory.New(serviceConfig)
+	result := RunPatchConfig(os.Getenv("TEST_RT_URL"), os.Getenv("TEST_RT_TOKEN"), repoKey, data, autoDelete, t)
 
-	// if err2 != nil {
-	// 	return err.Error()
-	// }
+	assert.Contains(t, string(result), "successfully")
+}
 
-	// params := services.NewLocalRepositoryBaseParams()
-	// params.Key = "test-go-generic-local"
-	// params.PackageType = "generic"
-	// params.Rclass = "LOCAL"
-	// params.Description = "This is a public description for generic-repo"
+func RtInfoAvailable() bool {
 
-	// err2 = servicesManager.CreateLocalRepositoryWithParams(params)
-	// if err2 != nil {
-	// 	return err.Error()
-	// }
+	result := true
 
-	// theRepo := services.MavenLocalRepositoryParams{}
+	if os.Getenv("TEST_RT_URL") == "" {
+		result = false
+	} else {
+		if os.Getenv("TEST_RT_TOKEN") == "" {
+			result = false
+		}
+	}
 
-	url := "https://yann-swampup.dev.aws.devopsacc.team/artifactory"
+	return result
+}
+
+func RunPatchConfig(url string, token string, repoKey string, data []byte, autoDelete bool, t *testing.T) string {
+
+	result := ""
+
+	// prepare HTTP request
 	client := &http.Client{}
-	req, _ := http.NewRequest(http.MethodGet, url+"/api/system/info", nil)
-	// req.Header.Set("Authorization", "Bearer eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJYZDNac0dZSkx2enE1ZElaY3pMb0hfR0poQ3NCU1Q0ZVZvZExWc1JUMkJRIn0.eyJleHQiOiJ7XCJyZXZvY2FibGVcIjpcInRydWVcIn0iLCJzdWIiOiJqZmFjQDAxZmFrZ21jbXliOTVmMGd5dGN4d24xcHBhXC91c2Vyc1wvYWRtaW4iLCJzY3AiOiJhcHBsaWVkLXBlcm1pc3Npb25zXC91c2VyIiwiYXVkIjoiKkAqIiwiaXNzIjoiamZmZUAwMDAiLCJleHAiOjE2NjQyMjAyNTAsImlhdCI6MTYzMjY4NDI1MCwianRpIjoiYTE5NzA4ZjQtYzlkNS00MzdkLWI3MTktNDdkYWM5YjQxZDFiIn0.JQs3nSBuD_oo3t0rB4UTMRc6vE-dTaIsH7mBMWcUqBjvhsAkK_701se2T2swy2gIaEC_BXeSNukUw3gQ-E9EnzpyfBQSgdTFII2CCE_81jcUtlpWFmzZq01Pwfdjyr-v2deqSH4jUK00KjH3jeZlKSbwEYy1_CK4z4PL8kPaIOzuPvqXg97strw1vYWgmotQVe-F298teC3AaIBG0dTBwB1CGCJ6o1GB78LyrjwiwlPtnywf1qXJAPGHhkYwHpJHtfrO6OMd0ik5T6EQzTqHiqKzpG5WX5wmMVwElFncdo1cje71g14R_YavRJ5dTUgbptDh3uC1W6DaNLr3qz11uA")
-	req.Header.Set("Authorization", "Bearer "+os.Getenv("TEST_RT_TOKEN"))
+	// req, _ := http.NewRequest(http.MethodGet, url+"/api/system/info", nil)
+	req, _ := http.NewRequest(http.MethodPatch, url+"/api/system/configuration", bytes.NewBuffer(data))
+	req.Header.Set("Content-Type", "application/yaml")
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	// run query and parse it
 	resp, err := client.Do(req)
 
 	if err != nil {
@@ -69,14 +92,65 @@ func InitRTConnection(t *testing.T) string {
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
+
 	if err != nil {
-		log.Fatal(err)
+		result = string(err.Error())
+	} else {
+		result = string(body)
 	}
-	t.Log(string(body))
-	t.Log("salut")
-	return "Hello World!"
+
+	// t.Log(string(body))
+	// t.Log(resp.StatusCode)
+
+	// cleanup if successful query
+	if autoDelete {
+		CleanupTestRepo(url, token, repoKey, t)
+	}
+
+	if err != nil {
+		t.Log(err.Error())
+	}
+
+	return result
 }
 
-func truc() string {
-	return "Hello World!"
+func CleanupTestRepo(url string, token string, repoKey string, t *testing.T) error {
+
+	var file *os.File
+	var servicesManager artifactory.ArtifactoryServicesManager
+
+	// mandatory to init the client
+	log.SetLogger(log.NewLogger(log.INFO, file))
+
+	rtDetails := auth.NewArtifactoryDetails()
+	rtDetails.SetUrl(url + "/")
+	rtDetails.SetAccessToken(token)
+	serviceConfig, err := config.NewConfigBuilder().
+		SetServiceDetails(rtDetails).
+		SetDryRun(false).
+		Build()
+
+	if err != nil {
+		return err
+	}
+
+	servicesManager, err = artifactory.New(serviceConfig)
+
+	if err != nil {
+		return err
+	}
+
+	t.Log("Deleting repo " + repoKey + " ... ")
+	time.Sleep(5 * time.Second)
+
+	err = servicesManager.DeleteRepository(repoKey)
+
+	if err != nil {
+		t.Log(err.Error())
+
+		return err
+	}
+	t.Log("Repo " + repoKey + " was successfully deleted")
+
+	return nil
 }
